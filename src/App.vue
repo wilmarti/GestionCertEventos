@@ -87,15 +87,17 @@
   <v-spacer></v-spacer>
 
   <v-btn 
-  color="success mr-4"
+  color="white"
   small
+  text
   >
     <v-icon>mdi-arrow-up-bold-box-outline</v-icon>
   </v-btn>
   
   <v-btn 
-  color="red"
+  color="white"
   small
+  text
   >
     <v-icon>mdi-cancel</v-icon>
   </v-btn>
