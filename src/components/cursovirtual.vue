@@ -43,7 +43,7 @@
                   >
                     <v-text-field
                       v-model="horas"
-                      :rules="horaslRules"
+                      :rules="horasRules"
                       label="Horas"
                       required
                     ></v-text-field>
@@ -111,7 +111,7 @@
             </thead>
             <tbody>
                 <tr
-                v-for="index in cursovirtual" :key="index"
+                v-for="index in cursovirtual" :key="index.name"
                 >
                 <td>{{ index.id }}</td>
                 <td>{{ index.DescripcionEvento }}</td>
@@ -135,13 +135,24 @@
   </v-container>
 </template>
 
+
+
+
+
+
 <script>
 
   import { validationMixin } from 'vuelidate'
   import { required, maxLength, email } from 'vuelidate/lib/validators'
+  import axios from 'axios'
 
 export default {
+
+  name: 'cursovirtual',
+
+
  data: () => ({
+      cursovirtual: null,
       valid: false,
       descripcionEvento: '',
       estado: '',
@@ -158,6 +169,14 @@ export default {
         v => v.data > 0 || 'Debe ser mayor a 0',
       ],
     }),
+
+        mounted(){      
+            //process.env.ApiUrl= "https://cnbcolombia.com/node/ApiACNB//api/" 
+            //console.log("montaje",env.ApiUrl)
+            this.getCursos();
+        },
+
+
     methods:{
       agregarEntrada(){
         this.nuevaEntrada = true
@@ -171,7 +190,15 @@ export default {
         this.estado = ''
         this.horas = ''
         this.tipoDiploma = ''
-      }
+      },
+      getCursos(){
+      axios.get('http://104.248.56.215:1337/eventos').then (response =>{
+        this.cursovirtual = response.data
+        console.log("cursos",response.data)
+      })
+      .catch (e => console.log("treendo error",e))
+
+    }
 
 
     }
