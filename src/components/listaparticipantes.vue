@@ -4,9 +4,9 @@
       <v-flex md12>
   <v-data-table
     :headers="headers"
-    :items="desserts"
-    sort-by="calories"
-    class="elevation-1"
+    :items="participantes"
+    :search="buscar"
+   
   >
     <template v-slot:top>
       <v-toolbar
@@ -19,6 +19,14 @@
           vertical
         ></v-divider>
         <v-spacer></v-spacer>
+        <v-text-field
+        v-model="buscar"
+        append-icon="mdi-magnify"
+        label="Buscar"
+        single-line
+        hide-details
+      ></v-text-field>
+     <v-spacer></v-spacer>
         <v-dialog
           v-model="dialog"
           max-width="500px"
@@ -27,11 +35,12 @@
             <v-btn
               color="primary"
               dark
+              small
               class="mb-2"
               v-bind="attrs"
               v-on="on"
             >
-              New Item
+              Agregar Participante 
             </v-btn>
           </template>
           <v-card>
@@ -48,8 +57,8 @@
                     md="4"
                   >
                     <v-text-field
-                      v-model="editedItem.name"
-                      label="Dessert name"
+                      v-model="editedItem.TipoId"
+                      label="Tipo Identificación"
                     ></v-text-field>
                   </v-col>
                   <v-col
@@ -58,8 +67,8 @@
                     md="4"
                   >
                     <v-text-field
-                      v-model="editedItem.calories"
-                      label="Calories"
+                      v-model="editedItem.NroId"
+                      label="Numero Identificación"
                     ></v-text-field>
                   </v-col>
                   <v-col
@@ -68,8 +77,8 @@
                     md="4"
                   >
                     <v-text-field
-                      v-model="editedItem.fat"
-                      label="Fat (g)"
+                      v-model="editedItem.PrimerApellido"
+                      label="Primer Apellido"
                     ></v-text-field>
                   </v-col>
                   <v-col
@@ -78,8 +87,8 @@
                     md="4"
                   >
                     <v-text-field
-                      v-model="editedItem.carbs"
-                      label="Carbs (g)"
+                      v-model="editedItem.SegundoApellido"
+                      label="Segundo Apellido"
                     ></v-text-field>
                   </v-col>
                   <v-col
@@ -88,8 +97,28 @@
                     md="4"
                   >
                     <v-text-field
-                      v-model="editedItem.protein"
-                      label="Protein (g)"
+                      v-model="editedItem.PrimerNombre"
+                      label="Primer Nombre"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col
+                    cols="12"
+                    sm="6"
+                    md="4"
+                  >
+                    <v-text-field
+                      v-model="editedItem.SegundoNombre"
+                      label="Segundo Nombre"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col
+                    cols="12"
+                    sm="6"
+                    md="4"
+                  >
+                    <v-text-field
+                      v-model="editedItem.Estado"
+                      label="Estado"
                     ></v-text-field>
                   </v-col>
                 </v-row>
@@ -103,25 +132,25 @@
                 text
                 @click="close"
               >
-                Cancel
+                Cancelar
               </v-btn>
               <v-btn
                 color="blue darken-1"
                 text
                 @click="save"
               >
-                Save
+                Guardar
               </v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
         <v-dialog v-model="dialogDelete" max-width="500px">
           <v-card>
-            <v-card-title class="text-h5">Are you sure you want to delete this item?</v-card-title>
+            <v-card-title class="text-h5">Esta seguro que quiere eliminar el participante?</v-card-title>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn color="blue darken-1" text @click="closeDelete">Cancel</v-btn>
-              <v-btn color="blue darken-1" text @click="deleteItemConfirm">OK</v-btn>
+              <v-btn color="blue darken-1" text @click="closeDelete">Cancelar</v-btn>
+              <v-btn color="blue darken-1" text @click="deleteItemConfirm">Confirmar</v-btn>
               <v-spacer></v-spacer>
             </v-card-actions>
           </v-card>
@@ -160,44 +189,54 @@
 
 
 <script>
+
+  import axios from 'axios'
+
   export default {
     data: () => ({
+      buscar:'',
       dialog: false,
       dialogDelete: false,
       headers: [
         {
-          text: 'Dessert (100g serving)',
+          text: 'Tipo Identificación',
           align: 'start',
           sortable: false,
-          value: 'name',
+          value: 'TipoId',
         },
-        { text: 'Calories', value: 'calories' },
-        { text: 'Fat (g)', value: 'fat' },
-        { text: 'Carbs (g)', value: 'carbs' },
-        { text: 'Protein (g)', value: 'protein' },
-        { text: 'Actions', value: 'actions', sortable: false },
+        { text: 'Numero Identificación', value: 'NroId' },
+        { text: 'Primer Apellido', value: 'PrimerApellido' },
+        { text: 'SegundoApellido', value: 'SegundoApellido' },
+        { text: 'Primer Nombre', value: 'PrimerNombre' },
+        { text: 'Segundo Nombre', value: 'SegundoNombre' },
+        { text: 'Estado', value: 'Estado' },
+        { text: 'Acciones', value: 'actions', sortable: false },
       ],
-      desserts: [],
+      participantes: [],
       editedIndex: -1,
       editedItem: {
-        name: '',
-        calories: 0,
-        fat: 0,
-        carbs: 0,
-        protein: 0,
+        TipoId: '',
+        NroId: 0,
+        PrimerApellido: '',
+        SegundoApellido: '',
+        PrimerNombre: '',
+        SegundoNombre: '',
+        Estado: '',
       },
       defaultItem: {
-        name: '',
-        calories: 0,
-        fat: 0,
-        carbs: 0,
-        protein: 0,
+        TipoId: '',
+        NroId: 0,
+        PrimerApellido: '',
+        SegundoApellido: '',
+        PrimerNombre: '',
+        SegundoNombre: '',
+        Estado: '',
       },
     }),
 
     computed: {
       formTitle () {
-        return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
+        return this.editedIndex === -1 ? 'Nuevo Participante' : 'Editar Participante'
       },
     },
 
@@ -210,100 +249,40 @@
       },
     },
 
-    created () {
+      mounted () {
       this.initialize()
     },
 
+
+
     methods: {
       initialize () {
-        this.desserts = [
-          {
-            name: 'Frozen Yogurt',
-            calories: 159,
-            fat: 6.0,
-            carbs: 24,
-            protein: 4.0,
-          },
-          {
-            name: 'Ice cream sandwich',
-            calories: 237,
-            fat: 9.0,
-            carbs: 37,
-            protein: 4.3,
-          },
-          {
-            name: 'Eclair',
-            calories: 262,
-            fat: 16.0,
-            carbs: 23,
-            protein: 6.0,
-          },
-          {
-            name: 'Cupcake',
-            calories: 305,
-            fat: 3.7,
-            carbs: 67,
-            protein: 4.3,
-          },
-          {
-            name: 'Gingerbread',
-            calories: 356,
-            fat: 16.0,
-            carbs: 49,
-            protein: 3.9,
-          },
-          {
-            name: 'Jelly bean',
-            calories: 375,
-            fat: 0.0,
-            carbs: 94,
-            protein: 0.0,
-          },
-          {
-            name: 'Lollipop',
-            calories: 392,
-            fat: 0.2,
-            carbs: 98,
-            protein: 0,
-          },
-          {
-            name: 'Honeycomb',
-            calories: 408,
-            fat: 3.2,
-            carbs: 87,
-            protein: 6.5,
-          },
-          {
-            name: 'Donut',
-            calories: 452,
-            fat: 25.0,
-            carbs: 51,
-            protein: 4.9,
-          },
-          {
-            name: 'KitKat',
-            calories: 518,
-            fat: 26.0,
-            carbs: 65,
-            protein: 7,
-          },
-        ]
+        this.participantes = []
+        axios.get('http://104.248.56.215:1337/participantes')
+        .then((response) => {
+            // load the API response into items for datatable
+            this.participantes = response.data
+            console.log("participantes",response.data)
+            })
+            .catch((error) => {
+            console.log(error)
+        })
       },
 
       editItem (item) {
-        this.editedIndex = this.desserts.indexOf(item)
+        this.editedIndex = this.participantes.indexOf(item)
         this.editedItem = Object.assign({}, item)
         this.dialog = true
       },
 
       deleteItem (item) {
-        this.editedIndex = this.desserts.indexOf(item)
+        this.editedIndex = this.participantes.indexOf(item)
         this.editedItem = Object.assign({}, item)
         this.dialogDelete = true
       },
 
       deleteItemConfirm () {
-        this.desserts.splice(this.editedIndex, 1)
+        this.participantes.splice(this.editedIndex, 1)
         this.closeDelete()
       },
 
@@ -327,7 +306,8 @@
         if (this.editedIndex > -1) {
           Object.assign(this.desserts[this.editedIndex], this.editedItem)
         } else {
-          this.desserts.push(this.editedItem)
+          this.participantes.push(this.editedItem)
+        
         }
         this.close()
       },
