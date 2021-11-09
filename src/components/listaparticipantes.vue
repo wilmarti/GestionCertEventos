@@ -254,7 +254,6 @@
     },
 
 
-
     methods: {
       initialize () {
         this.participantes = []
@@ -304,9 +303,30 @@
 
       save () {
         if (this.editedIndex > -1) {
-          Object.assign(this.desserts[this.editedIndex], this.editedItem)
+          Object.assign(this.participantes[this.editedIndex], this.editedItem)
         } else {
-          this.participantes.push(this.editedItem)
+          try {
+          axios.post('http://104.248.56.215:1337/participantes',this.editedItem)
+              .then((response) => {
+                if(response.data != ''){
+                console.log("cursos prueba",response.data)
+                this.initialize();
+                }
+                else{
+                  this.errorApi = true;
+                }
+
+                })
+                .catch((error) => {
+                console.log("cursos prueba3",response.data)  
+                console.log(error)
+              }) 
+            
+          } catch (error) {
+            
+            console.log("cursos prueba2",response.data)
+            
+          }
         
         }
         this.close()
