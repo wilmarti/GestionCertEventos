@@ -116,10 +116,10 @@
                     sm="6"
                     md="4"
                   >
-                    <v-text-field
-                      v-model="editedItem.Estado"
+                    <v-select
+                      :items="Estado"
                       label="Estado"
-                    ></v-text-field>
+                    ></v-select>
                   </v-col>
                 </v-row>
               </v-container>
@@ -197,6 +197,7 @@
       buscar:'',
       dialog: false,
       dialogDelete: false,
+      Estado: ['Activo','Inactivo'],
       headers: [
         {
           text: 'Tipo Identificación',

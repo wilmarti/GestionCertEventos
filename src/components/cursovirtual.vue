@@ -1,5 +1,15 @@
 <template>
+
   <v-container grid-list-xl>
+        <v-alert type="error" v-if="errorApi == true">
+      I'm an error alert.
+    </v-alert>
+
+    <v-alert type="success" v-if="okInsert == true">
+      Registro insertado correctamente.
+    </v-alert>
+
+
     <v-layout row wrap>
       <v-flex md12>
   <v-data-table
@@ -57,6 +67,7 @@
                     md="4"
                   >
                     <v-text-field
+                      :rules="rules.Descripcion"
                       v-model="editedItem.DescripcionEvento"
                       label="Descripcion"
                     ></v-text-field>
@@ -66,10 +77,15 @@
                     sm="6"
                     md="4"
                   >
-                    <v-text-field
-                      v-model="editedItem.EstadoEvento"
+                    <!-- <v-text-field
+                      v-model="editedItem.Estado"
                       label="Estado"
-                    ></v-text-field>
+                    ></v-text-field> -->
+                    <v-select
+                      :items="Estado"
+                      v-model="editedItem.Estado"
+                      label="Estado"
+                    ></v-select>
                   </v-col>
                   <v-col
                     cols="12"
@@ -77,6 +93,7 @@
                     md="4"
                   >
                     <v-text-field
+                    :rules="rules.ValHoras"
                       v-model="editedItem.Horas"
                       label="Horas"
                     ></v-text-field>
@@ -87,6 +104,7 @@
                     md="4"
                   >
                     <v-text-field
+                    :rules="rules.ValTipoDiploma"
                       v-model="editedItem.TipoDiploma"
                       label="Tipo Diploma"
                     ></v-text-field>
@@ -111,6 +129,7 @@
                 Cancelar
               </v-btn>
               <v-btn
+                :disabled="!formIsValid"              
                 color="blue darken-1"
                 text
                 @click="save"
@@ -174,10 +193,13 @@
 
     name: 'cursovirtual',
     data: () => ({
+      okInsert: false,
+      errorApi: false,
       buscar:'',
       cursovirtual: null,
       dialog: false,
       dialogDelete: false,
+      Estado: ['Activo','Inactivo'],
       headers: [
         {
           text: 'Descripcion Evento',
@@ -194,22 +216,39 @@
       editedIndex: -1,
       editedItem: {
         DescripcionEvento: '',
-        EstadoEvento: '',
-        Horas: 0,
+        Estado: '',
+        Horas: '',
         TipoDiploma: '',
       },
-      defaultItem: {
+        defaultItem: {
         DescripcionEvento: '',
-        EstadoEvento: '',
-        Horas: 0,
+        Estado: '',
+        Horas: '',
         TipoDiploma: '',
       },
+      
+      rules:{
+        Descripcion: [val => (val || '').length > 0 || 'Campo requerido'],
+        ValHoras: [val => val > 0  || 'Valor invalido'],
+        ValTipoDiploma: [val => (val || '').length > 0 || 'Campo requerido'],
+        
+      }
+      
     }),
 
     computed: {
       formTitle () {
         return this.editedIndex === -1 ? 'Nuevo Curso' : 'Editar Curso'
       },
+       formIsValid () {
+        return (
+          this.editedItem.DescripcionEvento &&
+          this.editedItem.Estado &&
+          this.editedItem.Horas &&
+          this.editedItem.TipoDiploma
+        )
+      }, 
+
     },
 
     watch: {
@@ -219,6 +258,7 @@
       dialogDelete (val) {
         val || this.closeDelete()
       },
+    
     },
      
      mounted(){      
@@ -229,28 +269,54 @@
 
     methods: {
         getCursos() {
+  
         this.cursos = []
         axios.get('http://104.248.56.215:1337/eventos')
         .then((response) => {
             // load the API response into items for datatable
             this.cursos = response.data
-            console.log("cursos",response.data)
+            this.okInsert= false
+            
             })
             .catch((error) => {
             console.log(error)
         })
         },
+        clear(){
+          this.editedItem.DescripcionEvento = ''
+          
+          this.editedItem.Horas = ''  
+          this.editedItem.TipoDiploma = ''
+
+
+
+        },
         
         editItem (item) {
+        this.clear();
         this.editedIndex = this.cursos.indexOf(item)
         this.editedItem = Object.assign({}, item)
         this.dialog = true
       },
+        
+        
         deleteItem (item) {
-        this.editedIndex = this.cursos.indexOf(item)
-        this.editedItem = Object.assign({}, item)
-        this.dialogDelete = true
+        // this.editedIndex = this.cursos.indexOf(item)
+        // this.editedItem = Object.assign({}, item)
+        // this.dialogDelete = true
+        axios.delete('http://104.248.56.215:1337/eventos/'+ item)
+        .then((response) => {
+          this.cursos = response.data
+          this.dialogDelete = true
+
+        })
+        .catch((error) => {
+          console.log(error)
+        })
       },
+
+
+    
 
       deleteItemConfirm () {
         this.cursos.splice(this.editedIndex, 1)
@@ -275,8 +341,37 @@
       save () {
         if (this.editedIndex > -1) {
           Object.assign(this.cursos[this.editedIndex], this.editedItem)
+
         } else {
-          this.cursos.push(this.editedItem)
+          try {
+              axios.post('http://104.248.56.215:1337/eventos',this.editedItem)
+              .then((response) => {
+                if(response.data != ''){
+                console.log("cursos prueba",response.data)
+                this.getCursos();
+                this.errorApi = false;
+                this.okInsert = true;
+                
+                }
+                else{
+                  this.errorApi = true;
+                }
+
+                })
+                .catch((error) => {
+                console.log("cursos prueba3",response.data)  
+                console.log(error)
+              }) 
+            
+          } catch (error) {
+            
+            console.log("cursos prueba2",response.data)
+            this.errorApi = true;
+            
+          }
+
+
+
         }
         this.close()
       },
