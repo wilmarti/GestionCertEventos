@@ -11,7 +11,7 @@
       contain
       max-height="40"
       max-width="63"
-      src="https://colegiodeodontologos.org/wp-content/uploads/2018/02/logo-mini.png"
+      src="https://colegiodeodontologos.org/wp-content/uploads/2021/09/Logo.png"
       ></v-img>
     </div>
 

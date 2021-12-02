@@ -49,6 +49,7 @@
               class="mb-2"
               v-bind="attrs"
               v-on="on"
+              
             >
               Nueva Entrada
             </v-btn>
@@ -268,9 +269,18 @@
         },
 
     methods: {
-        getCursos() {
-  
-        this.cursos = []
+        async getCursos() {
+
+          try{
+
+              let cursos = await axios.get('http://104.248.56.215:1337/eventos')
+              this.cursos = cursos.data
+              console.log(cursos);
+
+          } catch (error){
+            console.log(error);
+          }  
+/*         this.cursos = []
         axios.get('http://104.248.56.215:1337/eventos')
         .then((response) => {
             // load the API response into items for datatable
@@ -280,16 +290,14 @@
             })
             .catch((error) => {
             console.log(error)
-        })
+        }) */
         },
+
         clear(){
           this.editedItem.DescripcionEvento = ''
-          
+          this.editedItem.Estado = ''          
           this.editedItem.Horas = ''  
-          this.editedItem.TipoDiploma = ''
-
-
-
+          this.editedItem.TipoDiploma = '0'
         },
         
         editItem (item) {
@@ -297,22 +305,23 @@
         this.editedIndex = this.cursos.indexOf(item)
         this.editedItem = Object.assign({}, item)
         this.dialog = true
-      },
+        },
         
         
-        deleteItem (item) {
+        deleteItem (id) {
         // this.editedIndex = this.cursos.indexOf(item)
         // this.editedItem = Object.assign({}, item)
         // this.dialogDelete = true
-        axios.delete('http://104.248.56.215:1337/eventos/'+ item)
-        .then((response) => {
-          this.cursos = response.data
-          this.dialogDelete = true
+        this.editedItem = Object.assign({}, id)
+        axios.delete('http://104.248.56.215:1337/eventos/'+ id)
+        // .then((response) => {
+        //   this.cursos = response.data
+        //   this.dialogDelete = true
 
-        })
-        .catch((error) => {
-          console.log(error)
-        })
+        // })
+        // .catch((error) => {
+        //   console.log(error)
+        // })
       },
 
 
@@ -328,6 +337,7 @@
         this.$nextTick(() => {
           this.editedItem = Object.assign({}, this.defaultItem)
           this.editedIndex = -1
+          this.clear();
         })
       },
 
