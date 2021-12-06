@@ -48,8 +48,7 @@
               small
               class="mb-2"
               v-bind="attrs"
-              v-on="on"
-              
+              v-on="on"              
             >
               Nueva Entrada
             </v-btn>
@@ -133,6 +132,7 @@
                 :disabled="!formIsValid"              
                 color="blue darken-1"
                 text
+                type="submit"
                 @click="save"
               >
                 Guardar
@@ -158,6 +158,7 @@
         small
         class="mr-2"
         @click="editItem(item)"
+        
       >
         mdi-pencil
       </v-icon>
@@ -231,7 +232,7 @@
       rules:{
         Descripcion: [val => (val || '').length > 0 || 'Campo requerido'],
         ValHoras: [val => val > 0  || 'Valor invalido'],
-        ValTipoDiploma: [val => (val || '').length > 0 || 'Campo requerido'],
+        ValTipoDiploma: [val => val > 0 || 'Campo requerido'],
         
       }
       
@@ -262,7 +263,7 @@
     
     },
      
-     mounted(){      
+     created(){      
           //process.env.ApiUrl= "https://cnbcolombia.com/node/ApiACNB//api/" 
           //console.log("montaje",env.ApiUrl)
           this.getCursos();
@@ -297,35 +298,25 @@
           this.editedItem.DescripcionEvento = ''
           this.editedItem.Estado = ''          
           this.editedItem.Horas = ''  
-          this.editedItem.TipoDiploma = '0'
+          this.editedItem.TipoDiploma = ''
         },
         
         editItem (item) {
         this.clear();
         this.editedIndex = this.cursos.indexOf(item)
         this.editedItem = Object.assign({}, item)
+        // axios.put('http://104.248.56.215:1337/eventos/',this.editItem)
         this.dialog = true
+
         },
         
         
-        deleteItem (id) {
-        // this.editedIndex = this.cursos.indexOf(item)
-        // this.editedItem = Object.assign({}, item)
-        // this.dialogDelete = true
-        this.editedItem = Object.assign({}, id)
-        axios.delete('http://104.248.56.215:1337/eventos/'+ id)
-        // .then((response) => {
-        //   this.cursos = response.data
-        //   this.dialogDelete = true
-
-        // })
-        // .catch((error) => {
-        //   console.log(error)
-        // })
-      },
-
-
-    
+      deleteItem (item) {
+        this.editedIndex = this.cursos.indexOf(item)
+        this.editedItem = Object.assign({}, item)
+        this.dialogDelete = true
+        axios.delete('http://104.248.56.215:1337/eventos/'+ item.id)
+      },    
 
       deleteItemConfirm () {
         this.cursos.splice(this.editedIndex, 1)
@@ -346,6 +337,7 @@
         this.$nextTick(() => {
           this.editedItem = Object.assign({}, this.defaultItem)
           this.editedIndex = -1
+          this.clear();
         })
       },
       save () {
