@@ -117,6 +117,7 @@
                     md="4"
                   >
                     <v-select
+                      v-model="editedItem.Estado"
                       :items="Estado"
                       label="Estado"
                     ></v-select>
@@ -250,24 +251,22 @@
       },
     },
 
-      mounted () {
+      created () {
       this.initialize()
     },
 
 
     methods: {
-      initialize () {
-        this.participantes = []
-        axios.get('http://104.248.56.215:1337/participantes')
-        .then((response) => {
-            // load the API response into items for datatable
-            this.participantes = response.data
-            console.log("participantes",response.data)
-            })
-            .catch((error) => {
-            console.log(error)
-        })
-      },
+      async initialize () {
+          try{
+              let participantes = await axios.get('http://104.248.56.215:1337/participantes')
+              this.participantes = participantes.data
+              console.log(participantes);
+
+          } catch (error){
+            console.log(error);
+          }  
+        },
 
       editItem (item) {
         this.editedIndex = this.participantes.indexOf(item)
@@ -279,6 +278,7 @@
         this.editedIndex = this.participantes.indexOf(item)
         this.editedItem = Object.assign({}, item)
         this.dialogDelete = true
+        axios.delete('http://104.248.56.215:1337/participantes/'+ item.id)
       },
 
       deleteItemConfirm () {

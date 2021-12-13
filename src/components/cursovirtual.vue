@@ -264,8 +264,6 @@
     },
      
      created(){      
-          //process.env.ApiUrl= "https://cnbcolombia.com/node/ApiACNB//api/" 
-          //console.log("montaje",env.ApiUrl)
           this.getCursos();
         },
 
@@ -281,17 +279,6 @@
           } catch (error){
             console.log(error);
           }  
-/*         this.cursos = []
-        axios.get('http://104.248.56.215:1337/eventos')
-        .then((response) => {
-            // load the API response into items for datatable
-            this.cursos = response.data
-            this.okInsert= false
-            
-            })
-            .catch((error) => {
-            console.log(error)
-        }) */
         },
 
         clear(){
@@ -302,12 +289,10 @@
         },
         
         editItem (item) {
-        this.clear();
+        //this.clear();
         this.editedIndex = this.cursos.indexOf(item)
         this.editedItem = Object.assign({}, item)
-        // axios.put('http://104.248.56.215:1337/eventos/',this.editItem)
         this.dialog = true
-
         },
         
         
@@ -326,9 +311,9 @@
       close () {
         this.dialog = false
         this.$nextTick(() => {
-          this.editedItem = Object.assign({}, this.defaultItem)
-          this.editedIndex = -1
-          this.clear();
+        this.editedItem = Object.assign({}, this.defaultItem)
+        this.editedIndex = -1
+
         })
       },
 
@@ -343,16 +328,14 @@
       save () {
         if (this.editedIndex > -1) {
           Object.assign(this.cursos[this.editedIndex], this.editedItem)
+          axios.put('http://104.248.56.215:1337/eventos', this.editedItem)
 
         } else {
           try {
               axios.post('http://104.248.56.215:1337/eventos',this.editedItem)
               .then((response) => {
                 if(response.data != ''){
-                console.log("cursos prueba",response.data)
-                this.getCursos();
-                this.errorApi = false;
-                this.okInsert = true;
+
                 
                 }
                 else{
